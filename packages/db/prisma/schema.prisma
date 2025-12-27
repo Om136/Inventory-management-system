@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// packages/db/schema.prisma
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  skuCode      String   @unique
+  name         String
+  unit         String   // e.g., "Bags", "Tons", "Boxes" - Crucial for AEC materials
+  reorderLevel Int
+  createdAt    DateTime @default(now())
+
+  stocks       Stock[]
+  movements    StockMovement[]
+}
+
+model Location {
+  id        Int      @id @default(autoincrement())
+  name      String   // e.g., "Main Warehouse", "Site - Vadodara North"
+  createdAt DateTime @default(now())
+
+  stocks    Stock[]
+  // We link movements to locations for better querying
+  fromMovements StockMovement[] @relation("FromLocation")
+  toMovements   StockMovement[] @relation("ToLocation")
+}
+
+model Stock {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  locationId Int
+  quantity   Float    @default(0) // Use Float: materials like steel/sand are often fractional
+  updatedAt  DateTime @updatedAt  // CRITICAL for "Dead Stock" logic
+
+  product    Product  @relation(fields: [productId], references: [id])
+  location   Location @relation(fields: [locationId], references: [id])
+
+  @@unique([productId, locationId])
+}
+
+model StockMovement {
+  id             Int          @id @default(autoincrement())
+  productId      Int
+  
+  // Refined for Transfers:
+  fromLocationId Int?         // Null if it's a new purchase (IN)
+  toLocationId   Int?         // Null if it's a sale/damage (OUT)
+  
+  quantity       Float
+  type           MovementType
+  reason         String?
+  createdAt      DateTime     @default(now())
+
+  product        Product      @relation(fields: [productId], references: [id])
+  fromLocation   Location?    @relation("FromLocation", fields: [fromLocationId], references: [id])
+  toLocation     Location?    @relation("ToLocation", fields: [toLocationId], references: [id])
+}
+
+enum MovementType {
+  IN        // Purchase / received from vendor
+  OUT       // Used at site / Sold
+  DAMAGE    // Broken / Spoiled (Cement turns to stone)
+  TRANSFER  // Site-to-Site movement (Solves the margin problem!)
+}
