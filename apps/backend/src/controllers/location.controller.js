@@ -14,7 +14,6 @@ async function createLocation(req, res) {
     const location = await createLocationService({ name: name.trim() });
     return res.status(201).json(location);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     return res.status(500).json({ error: { message: "Internal server error" } });
   }
@@ -25,7 +24,6 @@ async function listLocations(req, res) {
     const locations = await listLocationsService();
     return res.status(200).json(locations);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     return res.status(500).json({ error: { message: "Internal server error" } });
   }

@@ -45,7 +45,6 @@ async function createProduct(req, res) {
         .json({ error: { message: "skuCode must be unique" } });
     }
 
-    // eslint-disable-next-line no-console
     console.error(err);
     return res.status(500).json({ error: { message: "Internal server error" } });
   }
@@ -56,7 +55,6 @@ async function listProducts(req, res) {
     const products = await listProductsService();
     return res.status(200).json(products);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     return res.status(500).json({ error: { message: "Internal server error" } });
   }
@@ -76,7 +74,6 @@ async function getProductById(req, res) {
 
     return res.status(200).json(product);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     return res.status(500).json({ error: { message: "Internal server error" } });
   }
