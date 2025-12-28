@@ -1,19 +1,19 @@
 const { prisma } = require("../utils/prisma");
 
-const DEAD_DAYS = 60;
+const DEFAULT_DEAD_DAYS = 60;
 
 function diffDays(a, b) {
   const ms = a.getTime() - b.getTime();
   return Math.floor(ms / (1000 * 60 * 60 * 24));
 }
 
-function computeStatus({ quantity, reorderLevel, daysIdle }) {
-  if (daysIdle > DEAD_DAYS) return "DEAD";
+function computeStatus({ quantity, reorderLevel, daysIdle, deadDays }) {
+  if (daysIdle > deadDays) return "DEAD";
   if (quantity <= reorderLevel) return "LOW";
   return "HEALTHY";
 }
 
-async function getInventoryHealth() {
+async function getInventoryHealth({ deadDays = DEFAULT_DEAD_DAYS } = {}) {
   const db = prisma();
 
   // NOTE: We use raw SQL to efficiently compute "last movement date" per (product, location).
@@ -61,6 +61,7 @@ async function getInventoryHealth() {
       quantity: Number(r.quantity),
       reorderLevel: Number(r.reorderLevel),
       daysIdle,
+      deadDays,
     });
 
     return {
@@ -83,12 +84,81 @@ async function getInventoryHealth() {
   });
 }
 
-async function getAlerts() {
-  const rows = await getInventoryHealth();
+async function getAlerts({ deadDays = DEFAULT_DEAD_DAYS } = {}) {
+  const rows = await getInventoryHealth({ deadDays });
   return {
     low: rows.filter((r) => r.status === "LOW"),
     dead: rows.filter((r) => r.status === "DEAD"),
   };
 }
 
-module.exports = { getInventoryHealth, getAlerts };
+async function getInventoryRow({ productId, locationId, deadDays = DEFAULT_DEAD_DAYS }) {
+  const db = prisma();
+  const rows = await db.$queryRaw`
+    SELECT
+      s."productId" AS "productId",
+      s."locationId" AS "locationId",
+      s."quantity" AS "quantity",
+      s."updatedAt" AS "updatedAt",
+
+      p."skuCode" AS "skuCode",
+      p."name" AS "productName",
+      p."unit" AS "unit",
+      p."reorderLevel" AS "reorderLevel",
+
+      l."name" AS "locationName",
+
+      MAX(m."createdAt") AS "lastMovementAt"
+    FROM "Stock" s
+    JOIN "Product" p ON p."id" = s."productId"
+    JOIN "Location" l ON l."id" = s."locationId"
+    LEFT JOIN "StockMovement" m
+      ON m."productId" = s."productId"
+      AND (m."fromLocationId" = s."locationId" OR m."toLocationId" = s."locationId")
+    WHERE s."productId" = ${productId} AND s."locationId" = ${locationId}
+    GROUP BY
+      s."productId",
+      s."locationId",
+      s."quantity",
+      s."updatedAt",
+      p."skuCode",
+      p."name",
+      p."unit",
+      p."reorderLevel",
+      l."name"
+    LIMIT 1;
+  `;
+
+  if (!rows || !rows.length) return null;
+
+  const r = rows[0];
+  const now = new Date();
+  const last = r.lastMovementAt || r.updatedAt;
+  const daysIdle = diffDays(now, new Date(last));
+  const status = computeStatus({
+    quantity: Number(r.quantity),
+    reorderLevel: Number(r.reorderLevel),
+    daysIdle,
+    deadDays,
+  });
+
+  return {
+    product: {
+      id: r.productId,
+      skuCode: r.skuCode,
+      name: r.productName,
+      unit: r.unit,
+      reorderLevel: r.reorderLevel,
+    },
+    location: {
+      id: r.locationId,
+      name: r.locationName,
+    },
+    quantity: Number(r.quantity),
+    lastMovementAt: r.lastMovementAt,
+    daysIdle,
+    status,
+  };
+}
+
+module.exports = { getInventoryHealth, getAlerts, getInventoryRow };

@@ -1,4 +1,5 @@
 const { prisma } = require("../utils/prisma");
+const { getInventoryRow } = require("./dashboard.service");
 
 function validationError(message) {
   const err = new Error(message);
@@ -58,7 +59,7 @@ async function incrementStock(tx, { productId, locationId, quantity }) {
 async function moveStock({ productId, fromLocationId, toLocationId, quantity, type, reason }) {
   const db = prisma();
 
-  return db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     await ensureProductAndLocationsExist(tx, { productId, fromLocationId, toLocationId });
 
     let fromStock = null;
@@ -111,6 +112,19 @@ async function moveStock({ productId, fromLocationId, toLocationId, quantity, ty
       },
     };
   });
+
+  // Post-transaction: attach backend-computed intelligence for the affected rows.
+  // This keeps frontend dumb: it can render status/daysIdle immediately.
+  const inventory = {
+    from: fromLocationId
+      ? await getInventoryRow({ productId, locationId: fromLocationId })
+      : null,
+    to: toLocationId
+      ? await getInventoryRow({ productId, locationId: toLocationId })
+      : null,
+  };
+
+  return { ...result, inventory };
 }
 
 module.exports = { moveStock };
