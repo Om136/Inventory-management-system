@@ -1,11 +1,12 @@
 const express = require("express");
 
-const { getInventoryHealth } = require("../controllers/dashboard.controller");
+const { getInventoryHealth, getAlerts } = require("../controllers/dashboard.controller");
 
 function createDashboardRouter() {
   const router = express.Router();
 
   router.get("/dashboard/inventory", getInventoryHealth);
+  router.get("/dashboard/alerts", getAlerts);
 
   return router;
 }

@@ -83,4 +83,12 @@ async function getInventoryHealth() {
   });
 }
 
-module.exports = { getInventoryHealth };
+async function getAlerts() {
+  const rows = await getInventoryHealth();
+  return {
+    low: rows.filter((r) => r.status === "LOW"),
+    dead: rows.filter((r) => r.status === "DEAD"),
+  };
+}
+
+module.exports = { getInventoryHealth, getAlerts };
