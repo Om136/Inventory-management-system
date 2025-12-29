@@ -22,8 +22,14 @@ async function getProductById(id) {
   return db.product.findUnique({ where: { id } });
 }
 
+async function updateProduct(id, data) {
+  const db = prisma();
+  return db.product.update({ where: { id }, data });
+}
+
 module.exports = {
   createProduct,
   listProducts,
   getProductById,
+  updateProduct,
 };

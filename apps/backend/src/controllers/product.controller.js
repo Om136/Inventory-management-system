@@ -2,11 +2,10 @@ const {
   createProduct: createProductService,
   listProducts: listProductsService,
   getProductById: getProductByIdService,
+  updateProduct: updateProductService,
 } = require("../services/product.service");
 
-const {
-  importProductsFromCsv,
-} = require("../services/productImport.service");
+const { importProductsFromCsv } = require("../services/productImport.service");
 
 function parseId(param) {
   const value = Number(param);
@@ -18,7 +17,9 @@ async function createProduct(req, res) {
     const { skuCode, name, unit, reorderLevel } = req.body || {};
 
     if (!skuCode || typeof skuCode !== "string") {
-      return res.status(400).json({ error: { message: "skuCode is required" } });
+      return res
+        .status(400)
+        .json({ error: { message: "skuCode is required" } });
     }
     if (!name || typeof name !== "string") {
       return res.status(400).json({ error: { message: "name is required" } });
@@ -50,7 +51,9 @@ async function createProduct(req, res) {
     }
 
     console.error(err);
-    return res.status(500).json({ error: { message: "Internal server error" } });
+    return res
+      .status(500)
+      .json({ error: { message: "Internal server error" } });
   }
 }
 
@@ -60,7 +63,9 @@ async function listProducts(req, res) {
     return res.status(200).json(products);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: { message: "Internal server error" } });
+    return res
+      .status(500)
+      .json({ error: { message: "Internal server error" } });
   }
 }
 
@@ -79,7 +84,72 @@ async function getProductById(req, res) {
     return res.status(200).json(product);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: { message: "Internal server error" } });
+    return res
+      .status(500)
+      .json({ error: { message: "Internal server error" } });
+  }
+}
+
+async function updateProduct(req, res) {
+  try {
+    const id = parseId(req.params.id);
+    if (!id) {
+      return res.status(400).json({ error: { message: "Invalid id" } });
+    }
+
+    const { name, unit, reorderLevel } = req.body || {};
+
+    const data = {};
+
+    if (name != null) {
+      if (typeof name !== "string" || !name.trim()) {
+        return res
+          .status(400)
+          .json({ error: { message: "name must be a non-empty string" } });
+      }
+      data.name = name.trim();
+    }
+
+    if (unit != null) {
+      if (typeof unit !== "string" || !unit.trim()) {
+        return res
+          .status(400)
+          .json({ error: { message: "unit must be a non-empty string" } });
+      }
+      data.unit = unit.trim();
+    }
+
+    if (reorderLevel != null) {
+      const reorderLevelNumber = Number(reorderLevel);
+      if (!Number.isFinite(reorderLevelNumber) || reorderLevelNumber < 0) {
+        return res
+          .status(400)
+          .json({ error: { message: "reorderLevel must be a number >= 0" } });
+      }
+      data.reorderLevel = Math.trunc(reorderLevelNumber);
+    }
+
+    if (!Object.keys(data).length) {
+      return res.status(400).json({
+        error: {
+          message:
+            "Provide at least one field to update: name, unit, reorderLevel",
+        },
+      });
+    }
+
+    const product = await updateProductService(id, data);
+    return res.status(200).json(product);
+  } catch (err) {
+    // Prisma throws P2025 on update where record doesn't exist
+    if (err && err.code === "P2025") {
+      return res.status(404).json({ error: { message: "Product not found" } });
+    }
+
+    console.error(err);
+    return res
+      .status(500)
+      .json({ error: { message: "Internal server error" } });
   }
 }
 
@@ -87,6 +157,7 @@ module.exports = {
   createProduct,
   listProducts,
   getProductById,
+  updateProduct,
   importProductsCsv,
 };
 
@@ -104,6 +175,8 @@ async function importProductsCsv(req, res) {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);
-    return res.status(500).json({ error: { message: "Internal server error" } });
+    return res
+      .status(500)
+      .json({ error: { message: "Internal server error" } });
   }
 }

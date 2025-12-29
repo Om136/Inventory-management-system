@@ -4,6 +4,7 @@ const {
   createProduct,
   listProducts,
   getProductById,
+  updateProduct,
   importProductsCsv,
 } = require("../controllers/product.controller");
 
@@ -16,6 +17,7 @@ function createProductRouter() {
   router.post("/products/import", upload.single("file"), importProductsCsv);
   router.get("/products", listProducts);
   router.get("/products/:id", getProductById);
+  router.patch("/products/:id", updateProduct);
 
   return router;
 }
