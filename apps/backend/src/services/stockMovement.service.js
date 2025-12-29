@@ -127,4 +127,26 @@ async function moveStock({ productId, fromLocationId, toLocationId, quantity, ty
   return { ...result, inventory };
 }
 
-module.exports = { moveStock };
+async function listStockMovements({ limit = 50, cursorId = null } = {}) {
+  const db = prisma();
+
+  const take = Math.max(1, Math.min(200, Math.trunc(Number(limit) || 50)));
+
+  const items = await db.stockMovement.findMany({
+    take,
+    skip: cursorId ? 1 : 0,
+    cursor: cursorId ? { id: cursorId } : undefined,
+    orderBy: [{ id: "desc" }],
+    include: {
+      product: { select: { id: true, skuCode: true, name: true, unit: true } },
+      fromLocation: { select: { id: true, name: true } },
+      toLocation: { select: { id: true, name: true } },
+    },
+  });
+
+  const nextCursor = items.length === take ? items[items.length - 1].id : null;
+
+  return { items, nextCursor };
+}
+
+module.exports = { moveStock, listStockMovements };

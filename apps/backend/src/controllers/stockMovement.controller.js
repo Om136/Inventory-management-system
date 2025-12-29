@@ -1,4 +1,7 @@
-const { moveStock: moveStockService } = require("../services/stockMovement.service");
+const {
+  moveStock: moveStockService,
+  listStockMovements: listStockMovementsService,
+} = require("../services/stockMovement.service");
 
 const MOVEMENT_TYPES = new Set(["IN", "OUT", "DAMAGE", "TRANSFER"]);
 
@@ -14,20 +17,25 @@ function toFloat(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+function parseLimit(value) {
+  if (value == null) return 50;
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  const i = Math.trunc(n);
+  if (i <= 0) return null;
+  return Math.min(200, i);
+}
+
 async function moveStock(req, res) {
   try {
-    const {
-      productId,
-      fromLocationId,
-      toLocationId,
-      quantity,
-      type,
-      reason,
-    } = req.body || {};
+    const { productId, fromLocationId, toLocationId, quantity, type, reason } =
+      req.body || {};
 
     const productIdInt = toInt(productId);
     if (!productIdInt || productIdInt <= 0) {
-      return res.status(400).json({ error: { message: "productId is required" } });
+      return res
+        .status(400)
+        .json({ error: { message: "productId is required" } });
     }
 
     if (!type || typeof type !== "string" || !MOVEMENT_TYPES.has(type)) {
@@ -53,19 +61,27 @@ async function moveStock(req, res) {
     }
 
     if (type === "IN" && (!toId || toId <= 0)) {
-      return res.status(400).json({ error: { message: "IN requires toLocationId" } });
+      return res
+        .status(400)
+        .json({ error: { message: "IN requires toLocationId" } });
     }
 
     if (type === "TRANSFER") {
       if (!fromId || fromId <= 0 || !toId || toId <= 0) {
         return res
           .status(400)
-          .json({ error: { message: "TRANSFER requires fromLocationId and toLocationId" } });
+          .json({
+            error: {
+              message: "TRANSFER requires fromLocationId and toLocationId",
+            },
+          });
       }
       if (fromId === toId) {
         return res
           .status(400)
-          .json({ error: { message: "TRANSFER requires different locations" } });
+          .json({
+            error: { message: "TRANSFER requires different locations" },
+          });
       }
     }
 
@@ -85,8 +101,36 @@ async function moveStock(req, res) {
     }
 
     console.error(err);
-    return res.status(500).json({ error: { message: "Internal server error" } });
+    return res
+      .status(500)
+      .json({ error: { message: "Internal server error" } });
   }
 }
 
-module.exports = { moveStock };
+async function listStockMovements(req, res) {
+  try {
+    const limit = parseLimit(req.query.limit);
+    if (req.query.limit != null && limit == null) {
+      return res
+        .status(400)
+        .json({ error: { message: "limit must be a positive integer" } });
+    }
+
+    const cursorId = req.query.cursor == null ? null : toInt(req.query.cursor);
+    if (req.query.cursor != null && (!cursorId || cursorId <= 0)) {
+      return res
+        .status(400)
+        .json({ error: { message: "cursor must be a positive integer" } });
+    }
+
+    const result = await listStockMovementsService({ limit, cursorId });
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ error: { message: "Internal server error" } });
+  }
+}
+
+module.exports = { moveStock, listStockMovements };

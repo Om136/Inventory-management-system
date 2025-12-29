@@ -25,6 +25,7 @@ export function NavBar() {
           <NavItem href="/dashboard" label="Dashboard" Icon={LayoutDashboard} />
           <NavItem href="/inventory" label="Inventory" Icon={Boxes} />
           <NavItem href="/move-stock" label="Move Stock" Icon={Shuffle} />
+          <NavItem href="/movements" label="Audit Trail" Icon={Shuffle} />
         </nav>
       </div>
     </header>
