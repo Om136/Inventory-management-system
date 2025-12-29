@@ -177,7 +177,7 @@ export function MoveStockClient() {
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold text-zinc-900">Move Stock</h1>
         <p className="text-sm text-zinc-600">
-          Record IN/OUT/DAMAGE/TRANSFER. Stock updates happen automatically.
+          Record IN/OUT/DAMAGE/TRANSFER.
         </p>
       </div>
 

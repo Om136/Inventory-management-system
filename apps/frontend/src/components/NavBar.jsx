@@ -18,7 +18,7 @@ export function NavBar() {
     <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <Link href="/dashboard" className="text-sm font-semibold text-zinc-900">
-          Inventory Flashlight
+          IVS
         </Link>
 
         <nav className="-mx-2 flex w-full items-center gap-1 overflow-x-auto px-2 sm:mx-0 sm:w-auto sm:px-0">

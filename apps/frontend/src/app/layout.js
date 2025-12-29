@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Inventory Flashlight",
+  title: "IVS - Inventory Visibility System",
   description: "Inventory visibility for multi-location material businesses",
 };
 
