@@ -23,6 +23,35 @@ From repo root:
 npm install
 ```
 
+### Seed demo data (optional)
+
+This will create a mix of Products/Locations/Stock and Stock Movements (IN/OUT/DAMAGE/TRANSFER) so you can see Dashboard alerts, Inventory status, and the Movements page populated.
+
+Requirements:
+- `DATABASE_URL` must be set (pointing to your dev database).
+
+Run (safe default: skips if products already exist):
+
+```bash
+npm run seed
+```
+
+Force seed even if products exist:
+
+PowerShell:
+
+```powershell
+$env:SEED_FORCE = "1"; npm run seed
+```
+
+Reset (deletes Product/Location/Stock/Movements and reseeds):
+
+PowerShell:
+
+```powershell
+$env:SEED_RESET = "1"; npm run seed
+```
+
 ### 3) Run backend + frontend (two terminals)
 
 Backend:
