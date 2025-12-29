@@ -5,8 +5,6 @@ const {
   updateProduct: updateProductService,
 } = require("../services/product.service");
 
-const { importProductsFromCsv } = require("../services/productImport.service");
-
 function parseId(param) {
   const value = Number(param);
   return Number.isFinite(value) ? value : null;
@@ -158,25 +156,4 @@ module.exports = {
   listProducts,
   getProductById,
   updateProduct,
-  importProductsCsv,
 };
-
-async function importProductsCsv(req, res) {
-  try {
-    if (!req.file || !req.file.buffer) {
-      return res.status(400).json({
-        error: { message: "CSV file is required (multipart field name: file)" },
-      });
-    }
-
-    const csvText = req.file.buffer.toString("utf-8");
-    const result = await importProductsFromCsv(csvText);
-    return res.status(200).json(result);
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err);
-    return res
-      .status(500)
-      .json({ error: { message: "Internal server error" } });
-  }
-}

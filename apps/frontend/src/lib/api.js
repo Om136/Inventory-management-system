@@ -47,19 +47,3 @@ export async function apiPatch(path, body) {
   }
   return data;
 }
-
-export async function apiUploadFile(path, file) {
-  const form = new FormData();
-  form.append("file", file);
-
-  const res = await fetch(getApiBaseUrl() + path, {
-    method: "POST",
-    body: form,
-  });
-  const data = await readJson(res);
-  if (!res.ok) {
-    const message = data?.error?.message || `Upload failed (${res.status})`;
-    throw new Error(message);
-  }
-  return data;
-}

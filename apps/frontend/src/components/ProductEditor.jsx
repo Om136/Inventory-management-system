@@ -168,9 +168,9 @@ export function ProductEditor({ onSaved }) {
             inputMode="numeric"
             className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm"
           />
-          <p className="mt-1 text-xs text-zinc-600">
+          {/* <p className="mt-1 text-xs text-zinc-600">
             Must be a whole number ≥ 0.
-          </p>
+          </p> */}
         </div>
 
         <div className="flex items-end">

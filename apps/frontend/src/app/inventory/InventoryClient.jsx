@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import { apiGet } from "@/lib/api";
 import { StatusBadge } from "@/components/StatusBadge";
-import { ProductCsvImport } from "@/components/ProductCsvImport";
-import { ProductEditor } from "@/components/ProductEditor";
 
 function formatLastMoved(lastMovementAt) {
   if (!lastMovementAt) return "—";
@@ -186,19 +184,6 @@ export function InventoryClient() {
               )}
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-sm font-semibold text-zinc-900">Tools</h2>
-          <p className="text-xs text-zinc-600">
-            Manage product master data and bulk imports.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <ProductCsvImport />
-          <ProductEditor onSaved={load} />
         </div>
       </section>
     </div>

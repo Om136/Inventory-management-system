@@ -17,7 +17,20 @@ function getDatabaseUrl() {
 
 function getPool() {
   if (!poolSingleton) {
-    poolSingleton = new Pool({ connectionString: getDatabaseUrl() });
+    const connectionString = getDatabaseUrl();
+
+    // Neon requires TLS; node-postgres does not reliably infer this from `sslmode=require`.
+    // We enable SSL when the connection string indicates it.
+    const needsSsl = /sslmode=require/i.test(connectionString);
+
+    poolSingleton = new Pool({
+      connectionString,
+      ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+      connectionTimeoutMillis: 10_000,
+      idleTimeoutMillis: 30_000,
+      max: 10,
+      keepAlive: true,
+    });
   }
   return poolSingleton;
 }
