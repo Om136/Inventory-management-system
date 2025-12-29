@@ -175,8 +175,8 @@ export function DashboardClient() {
         />
       </div>
 
-      <AlertsTable title="Dead stock (top 10)" rows={loading ? [] : deadTop} />
-      <AlertsTable title="Low stock (top 10)" rows={loading ? [] : lowTop} />
+      <AlertsTable title="Dead stock" rows={loading ? [] : deadTop} />
+      <AlertsTable title="Low stock" rows={loading ? [] : lowTop} />
 
       {loading ? <p className="text-sm text-zinc-600">Loading…</p> : null}
     </div>
