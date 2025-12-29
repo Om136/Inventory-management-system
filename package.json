@@ -10,6 +10,11 @@
     "packages/*"
   ],
   "scripts": {
+    "dev:backend": "npm -w backend run dev",
+    "dev:frontend": "npm -w frontend run dev",
+    "build:frontend": "npm -w frontend run build",
+    "start:backend": "npm -w backend run start",
+    "start:frontend": "npm -w frontend run start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

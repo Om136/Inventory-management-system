@@ -65,9 +65,9 @@ export function InventoryClient() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold text-zinc-900">Inventory</h1>
-          <p className="text-sm text-zinc-600">
+          {/* <p className="text-sm text-zinc-600">
             Source of truth across products and locations.
-          </p>
+          </p> */}
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row">

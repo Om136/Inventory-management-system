@@ -103,7 +103,7 @@ export function ProductEditor({ onSaved }) {
         <div>
           <h2 className="text-sm font-semibold text-zinc-900">Edit product</h2>
           <p className="text-xs text-zinc-600">
-            Update master data like reorder level (does not change stock).
+            Update data.
           </p>
         </div>
         <button
@@ -158,7 +158,7 @@ export function ProductEditor({ onSaved }) {
           />
         </div>
 
-        <div>
+        <div className="sm:col-span-2">
           <label className="text-xs font-semibold text-zinc-700">
             Reorder level
           </label>
@@ -173,7 +173,7 @@ export function ProductEditor({ onSaved }) {
           </p> */}
         </div>
 
-        <div className="flex items-end">
+        <div className="sm:col-span-2 pt-1">
           <button
             type="submit"
             disabled={saving || loading || !productId}

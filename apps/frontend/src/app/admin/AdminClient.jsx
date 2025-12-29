@@ -105,9 +105,9 @@ export function AdminClient() {
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-semibold text-zinc-900">Admin</h1>
-        <p className="text-sm text-zinc-600">
+        {/* <p className="text-sm text-zinc-600">
           Product master data tools (create and edit).
-        </p>
+        </p> */}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
