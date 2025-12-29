@@ -19,8 +19,7 @@ function getPool() {
   if (!poolSingleton) {
     const connectionString = getDatabaseUrl();
 
-    // Neon requires TLS; node-postgres does not reliably infer this from `sslmode=require`.
-    // We enable SSL when the connection string indicates it.
+  
     const needsSsl = /sslmode=require/i.test(connectionString);
 
     poolSingleton = new Pool({
@@ -30,6 +29,25 @@ function getPool() {
       idleTimeoutMillis: 30_000,
       max: 10,
       keepAlive: true,
+      keepAliveInitialDelayMillis: 30_000,
+    });
+
+    
+    poolSingleton.on("error", (err) => {
+      console.error("[db] pool error (will reset connections)", err);
+
+      const poolToClose = poolSingleton;
+      poolSingleton = undefined;
+
+      const prismaToClose = prismaSingleton;
+      prismaSingleton = undefined;
+
+      if (prismaToClose) {
+        prismaToClose.$disconnect().catch(() => {});
+      }
+      if (poolToClose) {
+        poolToClose.end().catch(() => {});
+      }
     });
   }
   return poolSingleton;
